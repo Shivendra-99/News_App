@@ -1,5 +1,4 @@
 package com.example.newsapp;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,6 +12,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -29,15 +31,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URL;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.widget.Toast.LENGTH_LONG;
-
-public class MainActivity extends AppCompatActivity implements NewsList.OnItemclickListner {
+public class MainActivity extends AppCompatActivity implements NewsList.OnItemclickListner, AdapterView.OnItemSelectedListener {
      RecyclerView recyclerView;
      List<News> ne;
     NewsList adapter;
+    String url;
+    ArrayList<String> spin;
+    Spinner spinner;
      SwipeRefreshLayout swipeRefreshLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,30 +50,35 @@ public class MainActivity extends AppCompatActivity implements NewsList.OnItemcl
         setContentView(R.layout.activity_main);
         recyclerView=findViewById(R.id.recycle);
         swipeRefreshLayout=findViewById(R.id.refresh);
+        spinner=findViewById(R.id.spinner);
+        spinner.setOnItemSelectedListener(this);
+        spin=new ArrayList<>();
+        spin.add("Breaking-News");
+        spin.add("Technology");
+        spin.add("Entertainment");
+        spin.add("Sports");
+        spin.add("Science");
+        ArrayAdapter a=new ArrayAdapter(this, android.R.layout.simple_spinner_item,spin);
+        a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(a);
         ne=new ArrayList<>();
-        fatchdata();
+    //    fatchdata();
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                ne.clear();
-                fatchdata();
-                adapter.notifyDataSetChanged();
+                if(!ne.isEmpty()) {
+                    ne.clear();
+                    fatchdata();
+                    adapter.notifyDataSetChanged();
+                }
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
     }
     private void fatchdata()
     {
-        if(ne.isEmpty())
-        {
-            Toast.makeText(this,"DATA is empty", LENGTH_LONG).show();
-        }
-        else
-        {
-            Toast.makeText(this,"DATA is full", LENGTH_LONG).show();
-        }
         RequestQueue queue= Volley.newRequestQueue(this);
-        String url="http://newsapi.org/v2/top-headlines?country=in&category=business&apiKey=87878f798bbd43649938ccc05261c206\n";
+       //  url="https://gnews.io/api/v4/top-headlines?token=e23fdb89958221d5d545593dd936681c&lang=en&country=in&max20&topic=technology";
         JsonObjectRequest json=new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -77,12 +87,13 @@ public class MainActivity extends AppCompatActivity implements NewsList.OnItemcl
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject num = jsonArray.getJSONObject(i);
                         News a = new News();
-                        Log.d("Welcome",num.getString("title").toString());
+                      //  Log.d("Welcome",num.getString("title").toString());
                         a.setTittle(num.getString("title").toString());
-                        a.setImgUrl(num.getString("urlToImage").toString());
-                        a.setAuthor(num.getString("author").toString());
+                        a.setImgUrl(num.getString("image").toString());
                         a.setUrl(num.getString("url").toString());
                         a.setTime(num.getString("publishedAt").toString());
+                        JSONObject j=num.getJSONObject("source");
+                        a.setAuthor(j.getString("name").toString());
                         ne.add(a);
                     }
                     adapter = new NewsList(ne,getApplicationContext());
@@ -108,5 +119,59 @@ public class MainActivity extends AppCompatActivity implements NewsList.OnItemcl
         CustomTabsIntent.Builder builder=new CustomTabsIntent.Builder();
         CustomTabsIntent customTabsIntent=builder.build();
         customTabsIntent.launchUrl(this, Uri.parse(url));
+    }
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Toast.makeText(getApplicationContext(),spin.get(position), LENGTH_LONG).show();
+        if(position==0)
+        {
+            url="https://gnews.io/api/v4/top-headlines?token=e23fdb89958221d5d545593dd936681c&lang=en&country=in&max20&topic=breaking-news";
+            if(!ne.isEmpty())
+            {
+                ne.clear();
+            }
+            fatchdata();
+        }
+        else if(position==1)
+        {
+            url="https://gnews.io/api/v4/top-headlines?token=e23fdb89958221d5d545593dd936681c&lang=en&country=in&max20&topic=technology";
+            if(!ne.isEmpty())
+            {
+                ne.clear();
+            }
+            fatchdata();
+        }
+        else if(position==2)
+        {
+            url="https://gnews.io/api/v4/top-headlines?token=e23fdb89958221d5d545593dd936681c&lang=en&country=in&max20&topic=entertainment";
+            if(!ne.isEmpty())
+            {
+                ne.clear();
+            }
+            fatchdata();
+        }
+        else if(position==3)
+        {
+            url="https://gnews.io/api/v4/top-headlines?token=e23fdb89958221d5d545593dd936681c&lang=en&country=in&max20&topic=sports";
+            if(!ne.isEmpty())
+            {
+                ne.clear();
+            }
+            fatchdata();
+        }
+        else if(position==4)
+        {
+            url="https://gnews.io/api/v4/top-headlines?token=e23fdb89958221d5d545593dd936681c&lang=en&country=in&max20&topic=science";
+            if(!ne.isEmpty())
+            {
+                ne.clear();
+            }
+            fatchdata();
+        }
+    }
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        url="https://gnews.io/api/v4/top-headlines?token=e23fdb89958221d5d545593dd936681c&lang=en&country=in&max20&topic=breaking-news";
+        fatchdata();
     }
 }

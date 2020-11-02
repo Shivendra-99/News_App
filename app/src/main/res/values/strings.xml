@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">News App</string>
+    <string name="ram">ram</string>
+    <string name="categories">categories</string>
 </resources>
