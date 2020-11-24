@@ -1,6 +1,7 @@
 # News_App
 ## Library are used in the app
 - Recylerview
+- News Api
 - Chrome Custom Tab
 - Picasso
 - SwipeRefreshLayout
