@@ -2,6 +2,7 @@
 ## Library are used in the app
 - Recylerview
 - News Api
+- JSON
 - Chrome Custom Tab
 - Picasso
 - SwipeRefreshLayout
